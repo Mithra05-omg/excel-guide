@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Excel Quick Reference</title>
+  <meta name="description" content="Searchable Excel reference: all 500+ functions, shortcuts, tools, fixes and everyday tasks.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <div class="bar">
+        <h1><span class="logo">X</span> Excel Quick Reference</h1>
+        <div class="actions">
+          <button id="printBtn" class="btn" type="button">Print cheat sheet</button>
+          <button id="themeBtn" class="btn" type="button" aria-label="Switch light or dark mode">Dark mode</button>
+        </div>
+      </div>
+
+      <div class="searchbox">
+        <input id="q" type="search" autocomplete="off" autofocus
+               placeholder="Search: date, sum, lookup, not adding, #N/A, paste values ...">
+        <button id="clearBtn" class="clear" type="button" aria-label="Clear search">Clear</button>
+      </div>
+
+      <nav id="filters" class="filters" aria-label="Filter by level"></nav>
+
+      <div class="row2">
+        <div id="usage" class="filters small" aria-label="Filter by how often it is used"></div>
+        <select id="cat" aria-label="Filter by category"></select>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <details class="sample">
+      <summary>Show the sample sheet used in the examples</summary>
+      <div class="sample-body">
+        <div id="sample" class="grid-scroll"></div>
+        <p>Columns have letters, rows have numbers. The cell where column E meets row 2 is <b>E2</b>.
+           Date examples use A1 = 01/10/2026 and B1 = 25/12/2026.</p>
+      </div>
+    </details>
+
+    <p id="count" class="count" aria-live="polite"></p>
+    <section id="results" class="cards"></section>
+    <div class="more"><button id="moreBtn" class="btn" type="button" hidden>Show more</button></div>
+
+    <div id="empty" class="empty" hidden>
+      <p><b>Nothing found.</b> Try a shorter word, for example <i>date</i>, <i>sum</i>, <i>lookup</i> or <i>error</i>.</p>
+    </div>
+  </main>
+
+  <footer class="wrap foot">
+    <p>Shortcuts are for Windows. On a Mac, use Cmd where it says Ctrl in most cases.
+       Press <kbd>/</kbd> to jump to the search box.</p>
+  </footer>
+
+  <section id="cheat" aria-hidden="true"></section>
+
+  <script src="data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
