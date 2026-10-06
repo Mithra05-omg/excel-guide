@@ -956,3 +956,150 @@ const ITEMS = [
   { l: 'shortcut', t: 'Alt + Q', d: 'Jump to the Search box at the top to find any command.', u: 'sometimes', k: 'search tell me command' },
   { l: 'shortcut', t: 'F1', d: 'Open Excel Help.', u: 'sometimes', k: 'help' }
 ];
+
+/*
+  PICTURES FOR THE "Show example" BUTTON
+
+  Most pictures are drawn automatically (formulas, shortcuts, click paths).
+  The entries below are the specially designed ones, matched by the item title.
+
+  before / after : small sheets. f = formula bar text, rows = the cells, note = caption.
+    Cell markers at the start of a cell:  ! problem (orange)   + fixed (green)
+                                          < text on the left   > on the right   ^ green corner triangle
+  path  : the buttons to click, in order
+  keys  : a shortcut to draw as keys
+  sheet : for a formula, 'dates' uses A1 = 01/10/2026 and B1 = 25/12/2026, 'none' shows no sheet
+*/
+const PICS = {
+  '#####': {
+    before: { rows: [['Date'], ['!#####']], note: 'The column is too narrow' },
+    after: { rows: [['Date'], ['+06/10/2026']], note: 'Double click the column edge to widen it' }
+  },
+  '#NAME?': {
+    before: { f: '=SUMM(A1:A2)', rows: [['10'], ['20'], ['!#NAME?']], note: 'SUMM is spelled wrongly' },
+    after: { f: '=SUM(A1:A2)', rows: [['10'], ['20'], ['+30']], note: 'Correct spelling' }
+  },
+  '#VALUE!': {
+    before: { f: '=A1+A2', rows: [['10'], ['<ten'], ['!#VALUE!']], note: 'A2 holds text, not a number' },
+    after: { f: '=A1+A2', rows: [['10'], ['10'], ['+20']], note: 'Both cells are numbers' }
+  },
+  '#DIV/0!': {
+    before: { f: '=A1/B1', rows: [['100', '', '!#DIV/0!']], note: 'B1 is empty, so it divides by zero' },
+    after: { f: '=IFERROR(A1/B1,0)', rows: [['100', '', '+0']], note: 'IFERROR shows 0 instead' }
+  },
+  '#REF!': {
+    before: { f: '=A1+#REF!', rows: [['10', '!#REF!']], note: 'The cell the formula used was deleted' },
+    after: { f: '=A1+B1', rows: [['10', '20', '+30']], note: 'Ctrl + Z brings the cell back' }
+  },
+  '#N/A': {
+    before: { f: '=XLOOKUP("Cap",A2:A3,B2:B3)', rows: [['Item', 'Price', '', 'Result'], ['Pen', '2.50', '', '!#N/A'], ['Bag', '45.00', '', '']], note: 'Cap is not in the list' },
+    after: { f: '=IFERROR(XLOOKUP("Cap",A2:A3,B2:B3),"Not found")', rows: [['Item', 'Price', '', 'Result'], ['Pen', '2.50', '', '+Not found'], ['Bag', '45.00', '', '']], note: 'A clear message instead of an error' }
+  },
+  '#NUM!': {
+    before: { f: '=SQRT(-9)', rows: [['!#NUM!']], note: 'No square root of a negative number' },
+    after: { f: '=SQRT(9)', rows: [['+3']], note: 'A valid input' }
+  },
+  '#SPILL!': {
+    before: { f: '=UNIQUE(A1:A4)', rows: [['Pen', '', '!#SPILL!'], ['Book', '', '<something here'], ['Pen', '', ''], ['Bag', '', '']], note: 'C2 is in the way of the results' },
+    after: { f: '=UNIQUE(A1:A4)', rows: [['Pen', '', '+Pen'], ['Book', '', '+Book'], ['Pen', '', '+Bag'], ['Bag', '', '']], note: 'C2 cleared, the results spill down' }
+  },
+  '#NULL!': {
+    before: { f: '=SUM(A1 A2)', rows: [['10'], ['20'], ['!#NULL!']], note: 'A space instead of a colon' },
+    after: { f: '=SUM(A1:A2)', rows: [['10'], ['20'], ['+30']], note: 'Colon added' }
+  },
+  'Green triangle in the corner of a cell': {
+    before: { rows: [['^<100'], ['^<250']], note: 'Numbers stored as text sit on the left' },
+    after: { rows: [['+100'], ['+250']], note: 'After Convert to Number they sit on the right' }
+  },
+  'Formula shows as text instead of an answer': {
+    before: { f: '=SUM(A1:A2)', rows: [['10'], ['20'], ['!<=SUM(A1:A2)']], note: 'The cell is formatted as Text' },
+    after: { f: '=SUM(A1:A2)', rows: [['10'], ['20'], ['+30']], note: 'Ctrl + Shift + ~, then F2, then Enter' }
+  },
+  'SUM gives 0 or a total that is too small': {
+    before: { f: '=SUM(A1:A2)', rows: [['^<100'], ['^<250'], ['!0']], note: 'Text numbers on the left are ignored' },
+    after: { f: '=SUM(A1:A2)', rows: [['100'], ['250'], ['+350']], note: 'Real numbers on the right add up' }
+  },
+  'Answers do not update when I change a number': {
+    path: ['Formulas', 'Calculation Options', 'Automatic'],
+    keys: 'F9'
+  },
+  'Lookup gives #N/A but I can see the value is there': {
+    before: { f: '=XLOOKUP(D1,A2:A3,B2:B3)', rows: [['Item', 'Price', '', '<Bag_'], ['Pen', '2.50', '', '!#N/A'], ['Bag', '45.00', '', '']], note: 'D1 has a hidden space after Bag (shown as _)' },
+    after: { f: '=XLOOKUP(TRIM(D1),A2:A3,B2:B3)', rows: [['Item', 'Price', '', '<Bag_'], ['Pen', '2.50', '', '+45.00'], ['Bag', '45.00', '', '']], note: 'TRIM removes the space' }
+  },
+  'VLOOKUP gives the wrong column or #REF!': {
+    before: { f: '=VLOOKUP("Bag",A2:C3,2,FALSE)', rows: [['Item', 'Qty', 'Price'], ['Pen', '10', '2.50'], ['Bag', '!2', '45.00']], note: 'Column 2 is Qty, not Price' },
+    after: { f: '=VLOOKUP("Bag",A2:C3,3,FALSE)', rows: [['Item', 'Qty', 'Price'], ['Pen', '10', '2.50'], ['Bag', '2', '+45.00']], note: 'Column 3 is Price' }
+  },
+  'VLOOKUP breaks when I copy it down': {
+    before: { rows: [['<Row 2', '<=VLOOKUP(G2,A2:E6,4,FALSE)'], ['<Row 3', '!<=VLOOKUP(G3,A3:E7,4,FALSE)']], note: 'The table range moved down with the formula' },
+    after: { rows: [['<Row 2', '<=VLOOKUP(G2,$A$2:$E$6,4,FALSE)'], ['<Row 3', '+<=VLOOKUP(G3,$A$2:$E$6,4,FALSE)']], note: 'The $ signs keep the table range fixed' }
+  },
+  'Excel will not accept my formula (pop up error)': {
+    before: { f: '=IF(A1>5,Yes,"No"', rows: [['8', '!Problem with this formula']], note: 'Missing quotes and a missing bracket' },
+    after: { f: '=IF(A1>5,"Yes","No")', rows: [['8', '+Yes']], note: 'Quotes around text, brackets closed' }
+  },
+  'My date turned into a number like 46301': {
+    before: { rows: [['!46301']], note: 'Still the date, shown as a number' },
+    after: { rows: [['+06/10/2026']], note: 'Ctrl + Shift + 3 shows it as a date' },
+    keys: 'Ctrl + Shift + 3'
+  },
+  'Excel does not treat my date as a date': {
+    before: { rows: [['!<06.10.2026']], note: 'On the left: Excel sees text' },
+    after: { rows: [['+>06/10/2026']], note: 'On the right: a real date' }
+  },
+  'Day and month are swapped in my dates': {
+    before: { rows: [['<The file means', '<Excel shows'], ['<3 October 2026', '!10/03/2026 (10 March)']], note: 'Month and day read the wrong way round' },
+    after: { rows: [['<The file means', '<Excel shows'], ['<3 October 2026', '+03/10/2026 (3 October)']], note: 'After Text to Columns with the right order' },
+    path: ['Data', 'Text to Columns', 'Next', 'Next', 'Date: MDY or DMY', 'Finish']
+  },
+  'The zero at the front disappears (0123 becomes 123)': {
+    before: { f: '123', rows: [['!123']], note: 'You typed 0123' },
+    after: { f: "'0123", rows: [['+<0123']], note: 'An apostrophe first keeps the zero' }
+  },
+  'Long number turns into 1.23E+11': {
+    before: { rows: [['!1.23457E+11']], note: 'Scientific format' },
+    after: { rows: [['+123456789012']], note: 'Number format with 0 decimals' }
+  },
+  'Flash Fill (Ctrl + E) does nothing': {
+    before: { rows: [['Full name', 'First'], ['Ali Hassan', '<Ali'], ['Siti Aminah', '!'], ['Raj Kumar', '!']], note: 'One example is not enough' },
+    after: { rows: [['Full name', 'First'], ['Ali Hassan', '<Ali'], ['Siti Aminah', '<Siti'], ['Raj Kumar', '+<Raj']], note: 'Two examples, then Ctrl + E fills the rest' }
+  },
+  'The fill handle is missing or drag does not copy': {
+    path: ['File', 'Options', 'Advanced', 'Enable fill handle and cell drag and drop', 'OK']
+  },
+  'Dragging down copies the same number instead of 1, 2, 3': {
+    before: { rows: [['1'], ['!1'], ['!1'], ['!1']], note: 'Dragged from one cell' },
+    after: { rows: [['1'], ['2'], ['+3'], ['+4']], note: 'Type 1 and 2, select both, then drag' }
+  },
+  'I cannot edit the cell or the menus are grey': {
+    keys: 'Esc',
+    path: ['Review', 'Unprotect Sheet']
+  },
+  'Arrow keys scroll the page instead of moving the cell': {
+    keys: 'ScrLk'
+  },
+  'Sorting mixed up my rows': {
+    before: { rows: [['Name', 'Score'], ['!Ali', '90'], ['!Raj', '75'], ['!Siti', '60']], note: 'Only the Name column was sorted. Siti scored 90, not Ali' },
+    after: { rows: [['Name', 'Score'], ['+Ali', '+60'], ['+Raj', '+75'], ['+Siti', '+90']], note: 'Click one cell, then sort: whole rows move together' }
+  },
+  'Circular reference warning': {
+    before: { f: '=SUM(A1:A3)', rows: [['10'], ['20'], ['!0']], note: 'The formula in A3 includes A3 itself' },
+    after: { f: '=SUM(A1:A2)', rows: [['10'], ['20'], ['+30']], note: 'The range stops above the formula' }
+  },
+  'A shortcut does nothing': {
+    keys: 'Fn + F2 / Fn + F4'
+  },
+  'Percent shows as 0.37 instead of 37%': {
+    before: { rows: [['!0.37']], note: 'Correct answer, plain format' },
+    after: { rows: [['+37%']], note: 'Percent format' },
+    keys: 'Ctrl + Shift + 5'
+  },
+
+  /* formulas that use the date cells A1 and B1 */
+  'Days until a date': { sheet: 'dates' },
+  'Is the date a weekend?': { sheet: 'dates' },
+  'Join text with a date': { sheet: 'dates' },
+  'First day of the month': { sheet: 'dates' },
+  'Quarter from a date': { sheet: 'dates' }
+};
